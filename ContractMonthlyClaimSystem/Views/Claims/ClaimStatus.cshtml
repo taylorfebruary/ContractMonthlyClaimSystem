@@ -1,0 +1,24 @@
+﻿@model ContractMonthlyClaimSystem.Models.Claim
+
+<div>
+    <h2>Claim Status</h2>
+    <p>Lecturer: @Model.LecturerId</p>
+    <p>Hours Worked: @Model.HoursWorked</p>
+    <p>Hourly Rate: @Model.HourlyRate</p>
+    <p>Notes: @Model.Notes</p>
+    <p>Status: @Model.Status</p>
+
+    @if (Model.SupportingDocuments != null && Model.SupportingDocuments.Any())
+    {
+        foreach (var document in Model.SupportingDocuments)
+        {
+            <p>Document: <a href="@document.Url" target="_blank">@document.DocumentId</a></p>
+        }
+    }
+    else
+    {
+        <p>No supporting documents available.</p>
+    }
+
+</div>
+

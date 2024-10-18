@@ -5,5 +5,7 @@
         public int DocumentId { get; set; }
         public int ClaimId { get; set; }
         public string FilePath { get; set; }
+        public string Url { get; set; }
+
     }
 }
