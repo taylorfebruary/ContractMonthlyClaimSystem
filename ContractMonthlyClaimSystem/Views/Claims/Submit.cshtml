@@ -1,0 +1,26 @@
+﻿@model ContractMonthlyClaimSystem.Models.Claim
+
+<form asp-action="Submit" method="post" enctype="multipart/form-data">
+    <label for="LecturerName">Lecturer Name:</label>
+    <input asp-for="LecturerId" class="form-control" />
+    <span asp-validation-for="LecturerId" class="text-danger"></span>
+
+    <label for="HoursWorked">Hours Worked:</label>
+    <input asp-for="HoursWorked" class="form-control" />
+    <span asp-validation-for="HoursWorked" class="text-danger"></span>
+
+    <label for="HourlyRate">Hourly Rate:</label>
+    <input asp-for="HourlyRate" class="form-control" />
+    <span asp-validation-for="HourlyRate" class="text-danger"></span>
+
+    <label for="Notes">Notes:</label>
+    <textarea asp-for="Notes" class="form-control"></textarea>
+    <span asp-validation-for="Notes" class="text-danger"></span>
+
+    <label for="Document">Supporting Document:</label>
+    <input type="file" name="document" class="form-control" />
+    <span asp-validation-summary="ModelOnly" class="text-danger"></span>
+
+    <button type="submit" class="btn btn-primary mt-3">Submit</button>
+</form>
+

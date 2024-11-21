@@ -1,0 +1,32 @@
+﻿@model ContractMonthlyClaimSystem.Models.Claim
+
+<div class="card">
+    <div class="card-header">
+        Claim Details
+    </div>
+    <div class="card-body">
+        <p><strong>Lecturer Name:</strong> @Model.LecturerId</p>
+        <p><strong>Hours Worked:</strong> @Model.HoursWorked</p>
+        <p><strong>Hourly Rate:</strong> @Model.HourlyRate</p>
+        <p><strong>Total Payment:</strong> @Model.TotalAmount</p>
+        <p><strong>Status:</strong> @Model.Status</p>
+        <p><strong>Notes:</strong> @Model.Notes</p>
+        @if (!string.IsNullOrEmpty(Model.DocumentPath))
+        {
+            <p><strong>Supporting Document:</strong> <a href="@Model.DocumentPath" target="_blank">Download</a></p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.querySelector("form").addEventListener("submit", function (e) {
+            let hours = parseFloat(document.querySelector("[name='HoursWorked']").value);
+            let rate = parseFloat(document.querySelector("[name='HourlyRate']").value);
+            if (hours < 1 || hours > 500 || rate < 50 || rate > 1000) {
+                e.preventDefault();
+                alert("Ensure Hours Worked is between 1-500 and Hourly Rate is between 50-1000.");
+            }
+        });
+    </script>
+} 

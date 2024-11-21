@@ -7,67 +7,84 @@ namespace ContractMonthlyClaimSystem.Controllers
 {
     public class ClaimsController : Controller
     {
-        private static List<Claim> Claims = new List<Claim>();
+        private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public IActionResult Create()
+        public ClaimsController(ApplicationDbContext context, IWebHostEnvironment env)
+        {
+            _context = context;
+            _env = env;
+        }
+
+        public IActionResult Index()
+        {
+            var claims = _context.Claims.ToList();
+            return View(claims);
+        }
+
+        public IActionResult Submit()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult Create(Claim claim)
+        public IActionResult Submit(ClaimViewModel model)
         {
-            claim.ClaimId = Claims.Count + 1;
-            claim.Status = ClaimStatus.Pending;
-            Claims.Add(claim);
-            return RedirectToAction("Submitted", new { id = claim.ClaimId });
-        }
-
-        // Track status
-        public IActionResult Status(int id)
-        {
-            var claim = Claims.FirstOrDefault(c => c.ClaimId == id);
-            return View(claim);
-        }
-
-        // Approve/Reject by Coordinator/Manager
-        [HttpPost]
-        public IActionResult Approve(int claimId)
-        {
-            var claim = Claims.FirstOrDefault(c => c.ClaimId == claimId);
-            claim.Status = ClaimStatus.Approved;
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public IActionResult Reject(int claimId)
-        {
-            var claim = Claims.FirstOrDefault(c => c.ClaimId == claimId);
-            claim.Status = ClaimStatus.Rejected;
-            return RedirectToAction("Index");
-        }
-
-        public IActionResult UploadDocument(IFormFile file, int claimId)
-        {
-            if (file != null && file.Length > 0)
+            if (ModelState.IsValid)
             {
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads", file.FileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                // Save the file
+                string uploadsFolder = Path.Combine(_env.WebRootPath, "uploads");
+                Directory.CreateDirectory(uploadsFolder);
+
+                string uniqueFileName = $"{Guid.NewGuid()}_{model.Document.FileName}";
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
-                    file.CopyTo(stream);
+                    model.Document.CopyTo(fileStream);
                 }
 
-                var claim = Claims.FirstOrDefault(c => c.ClaimId == claimId);
-                claim.SupportingDocuments.Add(new Document { FilePath = filePath });
+                // Save claim data
+                var claim = new Claim
+                {
+                    LecturerId = model.LecturerName,
+                    HoursWorked = model.HoursWorked,
+                    HourlyRate = model.HourlyRate,
+                    TotalAmount = model.TotalAmount,
+                    Notes = model.Notes,
+                    DocumentPath = uniqueFileName,
+                    Status = "Pending"
+                };
+
+                _context.Claims.Add(claim);
+                _context.SaveChanges();
+
+                return RedirectToAction("Index");
             }
 
-            return RedirectToAction("Status", new { id = claimId });
+            return View(model);
         }
 
-        // View all claims for coordinators/managers
-        public IActionResult Index()
+        public IActionResult Approve(int id)
         {
-            return View(Claims);
+            var claim = _context.Claims.Find(id);
+            if (claim != null)
+            {
+                claim.Status = "Approved";
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Index");
+        }
+
+        public IActionResult Reject(int id)
+        {
+            var claim = _context.Claims.Find(id);
+            if (claim != null)
+            {
+                claim.Status = "Rejected";
+                _context.SaveChanges();
+            }
+            return RedirectToAction("Index");
         }
     }
 }
